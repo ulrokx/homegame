@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+div[data-lastpass-icon-root="true"] {
+  opacity: 0;
+}
+div[data-lastpass-infield="true"] {
+  opacity: 0;
+}
