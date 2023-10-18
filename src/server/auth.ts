@@ -5,7 +5,7 @@ import {
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
-import { type AdapterUser } from "next-auth/adapters";
+import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
 import { env } from "~/env.mjs";
@@ -35,33 +35,39 @@ declare module "next-auth" {
 
 const prismaAdapter = PrismaAdapter(db);
 
-const createPlayer = async (user: AdapterUser) => {
-  await db.player.create({
-    data: {
-      email: user.email,
-      user: {
-        connect: {
-          email: user.email,
-        },
-      },
-    },
-  });
-};
+const googleAuthAvailable = () => Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+const credentialsAuthAvailable = () => process.env.NODE_ENV !== "production";
 
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
- *
- * @see https://next-auth.js.org/configuration/options
+*
+* @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    // removing this made everything work...
+    // session: ({ session, user, token }) => {
+    //   return {
+    //   ...session,
+    //   user: {
+    //     ...session.user,
+    //     id: user.id || token.sub,
+    //   },
+    // }
+    // },
+    // jwt: async ({ token, user, account, profile }) => {
+    //   console.log("jwt", token, user, account, profile)
+    //   if (account?.provider === "google") {
+    //     token.email = profile!.email;
+    //   }
+    //   if (user?.id) {
+    //     token.sub = user.id;
+    //   }
+    //   return token;
+    // }
   },
   adapter: {
     ...prismaAdapter,
@@ -72,6 +78,7 @@ export const authOptions: NextAuthOptions = {
       return db.user.create({
         data: {
           ...user,
+          name: user.name,
           player: {
             connectOrCreate: {
               create: {
@@ -87,13 +94,38 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
-    GoogleProvider({
+    ... googleAuthAvailable() ? [GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
       httpOptions: {
         timeout: 10000,
       },
-    }),
+    })] : [],
+    ... credentialsAuthAvailable() ? [
+      CredentialsProvider({
+        name: "Credentials",
+        credentials: {
+          email: {
+            label: "Email",
+            type: "text",
+          },
+        },
+        async authorize(credentials) {
+          if (!credentials) {
+            return null;
+          }
+          const user = await db.user.findFirst({
+            where: {
+              email: credentials.email,
+            },
+          });
+          if (!user) {
+            return null;
+          }
+          return user;
+        },
+      })
+    ] : []
     /**
      * ...add more providers here.
      *
