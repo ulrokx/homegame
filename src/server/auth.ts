@@ -35,13 +35,14 @@ declare module "next-auth" {
 
 const prismaAdapter = PrismaAdapter(db);
 
-const googleAuthAvailable = () => Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+const googleAuthAvailable = () =>
+  Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 const credentialsAuthAvailable = () => process.env.NODE_ENV !== "production";
 
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
-*
-* @see https://next-auth.js.org/configuration/options
+ *
+ * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
   session: {
@@ -94,38 +95,44 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
-    ... googleAuthAvailable() ? [GoogleProvider({
-      clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET,
-      httpOptions: {
-        timeout: 10000,
-      },
-    })] : [],
-    ... credentialsAuthAvailable() ? [
-      CredentialsProvider({
-        name: "Credentials",
-        credentials: {
-          email: {
-            label: "Email",
-            type: "text",
-          },
-        },
-        async authorize(credentials) {
-          if (!credentials) {
-            return null;
-          }
-          const user = await db.user.findFirst({
-            where: {
-              email: credentials.email,
+    ...(googleAuthAvailable()
+      ? [
+          GoogleProvider({
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+            httpOptions: {
+              timeout: 10000,
             },
-          });
-          if (!user) {
-            return null;
-          }
-          return user;
-        },
-      })
-    ] : []
+          }),
+        ]
+      : []),
+    ...(credentialsAuthAvailable()
+      ? [
+          CredentialsProvider({
+            name: "Credentials",
+            credentials: {
+              email: {
+                label: "Email",
+                type: "text",
+              },
+            },
+            async authorize(credentials) {
+              if (!credentials) {
+                return null;
+              }
+              const user = await db.user.findFirst({
+                where: {
+                  email: credentials.email,
+                },
+              });
+              if (!user) {
+                return null;
+              }
+              return user;
+            },
+          }),
+        ]
+      : []),
     /**
      * ...add more providers here.
      *

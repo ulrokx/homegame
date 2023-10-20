@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { type RouterOutputs } from "../../utils/api";
 import StatusIcon from "./StatusIcon";
-import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
+import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 
 interface PlayerTableProps {
   players: NonNullable<RouterOutputs["game"]["getGame"]>["players"]; // TODO: don't do this

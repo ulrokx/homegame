@@ -14,13 +14,15 @@ const db =
       env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 
-db.$use(createSoftDeleteMiddleware({
-  models: {
-    Game: true,
-    PlayerStat: true
-  }
-}))
+db.$use(
+  createSoftDeleteMiddleware({
+    models: {
+      Game: true,
+      PlayerStat: true,
+    },
+  }),
+);
 
-export {db};
+export { db };
 
 if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;

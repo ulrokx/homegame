@@ -12,10 +12,10 @@ export const gameRouter = createTRPCRouter({
         players: {
           some: {
             playerEmail: ctx.session.user.email,
-          }
-        }
-      }
-    })
+          },
+        },
+      },
+    });
   }),
   getGame: publicProcedure
     .input(z.object({ id: z.string() }))
@@ -73,14 +73,14 @@ export const gameRouter = createTRPCRouter({
     }),
   updateGame: protectedProcedure
     .input(z.object({ gameId: z.string(), game: gameValidationSchema }))
-    .mutation(async ({input: {gameId, game}, ctx }) => {
+    .mutation(async ({ input: { gameId, game }, ctx }) => {
       const existingGame = await ctx.db.game.findFirstOrThrow({
         where: {
           id: gameId,
         },
         include: {
           players: true,
-        }
+        },
       });
       if (existingGame.ownerEmail !== ctx.session.user.email) {
         throw "Access denied";
@@ -91,7 +91,12 @@ export const gameRouter = createTRPCRouter({
       if (game.players.length < 2) {
         throw "Must have at least 2 players";
       }
-      if (existingGame.status !== "PENDING" && !existingGame.players.every(player => game.players.includes(player.playerEmail))) {
+      if (
+        existingGame.status !== "PENDING" &&
+        !existingGame.players.every((player) =>
+          game.players.includes(player.playerEmail),
+        )
+      ) {
         throw "Cannot remove players from a game that has already started";
       }
       if (game.players.length > game.players.length) {
@@ -141,16 +146,16 @@ export const gameRouter = createTRPCRouter({
     )
     .mutation(async ({ input: { gameId, status }, ctx }) => {
       const playerStat = await ctx.db.playerStat.findFirst({
-          where: {
-            gameId,
-            playerEmail: ctx.session.user.email,
-          },
-          })
+        where: {
+          gameId,
+          playerEmail: ctx.session.user.email,
+        },
+      });
       if (!playerStat) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Player not found",
-        })
+        });
       }
       const playerEmail = ctx.session.user.email;
       await ctx.db.playerStat.update({
@@ -182,7 +187,7 @@ export const gameRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Player not found",
-        })
+        });
       }
       return playerStat.accepted;
     }),
@@ -201,14 +206,14 @@ export const gameRouter = createTRPCRouter({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Game not found",
-        })
+        });
       }
       const isOwner = game.ownerEmail === ctx.session.user.email;
       if (!isOwner && !game.openInvite) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Only the owner can invite players",
-        })
+        });
       }
       if (game.players.find((player) => player.playerEmail === email)) {
         return false;
@@ -239,78 +244,80 @@ export const gameRouter = createTRPCRouter({
     .mutation(async ({ input: { gameId }, ctx }) => {
       const existingGame = await ctx.db.game.findFirst({
         where: {
-          id: gameId
-        }
+          id: gameId,
+        },
       });
       if (!existingGame) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Game not found"
-        })
+          message: "Game not found",
+        });
       }
       if (existingGame.ownerEmail !== ctx.session.user.email) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Only the owner can delete a game"
-        })
+          message: "Only the owner can delete a game",
+        });
       }
       await ctx.db.game.delete({
         where: {
-          id: gameId
+          id: gameId,
         },
-      })
+      });
       return true;
     }),
-    startGame: protectedProcedure
-      .input(z.object({ gameId: z.string() }))
-      .mutation(async ({ input: { gameId }, ctx }) => {
-        const existingGame = await ctx.db.game.findFirst({
-          where: {
-            id: gameId
-          },
-          include: {
-            players: true,
-          }
+  startGame: protectedProcedure
+    .input(z.object({ gameId: z.string() }))
+    .mutation(async ({ input: { gameId }, ctx }) => {
+      const existingGame = await ctx.db.game.findFirst({
+        where: {
+          id: gameId,
+        },
+        include: {
+          players: true,
+        },
+      });
+      if (!existingGame) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Game not found",
         });
-        if (!existingGame) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Game not found"
-          })
-        }
-        if (existingGame.ownerEmail !== ctx.session.user.email) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Only the owner can start a game"
-          })
-        }
-        if (existingGame.status !== "PENDING") {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Game has already started"
-          })
-        }
-        if (existingGame.players.length < 2) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Must have at least 2 players"
-          })
-        }
-        const acceptedPlayers = existingGame.players.filter(player => player.accepted === "YES")
-        if (acceptedPlayers.length < 2) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Must have at least 2 accepted players"
-          })
-        }
+      }
+      if (existingGame.ownerEmail !== ctx.session.user.email) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only the owner can start a game",
+        });
+      }
+      if (existingGame.status !== "PENDING") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Game has already started",
+        });
+      }
+      if (existingGame.players.length < 2) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Must have at least 2 players",
+        });
+      }
+      const acceptedPlayers = existingGame.players.filter(
+        (player) => player.accepted === "YES",
+      );
+      if (acceptedPlayers.length < 2) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Must have at least 2 accepted players",
+        });
+      }
 
-        await ctx.db.game.update({
-          where: {
-            id: gameId
-          },
-          data: {
-            status: "IN_PROGRESS"
-          }
-        })
-      })
+      await ctx.db.game.update({
+        where: {
+          id: gameId,
+        },
+        data: {
+          status: "IN_PROGRESS",
+        },
+      });
+    }),
 });

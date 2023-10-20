@@ -40,7 +40,7 @@ export default function PokerPlayersSelect<T extends FieldValues>({
   ...props
 }: PokerPlayersSelectProps<T>) {
   const { data: playerData, isLoading } = api.user.getUsers.useQuery();
-  const {data: sessionData} = useSession()
+  const { data: sessionData } = useSession();
   if (!playerData || isLoading) return <Skeleton variant="rectangular" />;
   const otherPlayers = playerData.filter(
     (player) => player.email !== sessionData?.user.email,

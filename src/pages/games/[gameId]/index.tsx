@@ -24,7 +24,10 @@ export default function Game() {
         <h3 className="text-xl font-semibold">{gameData.location}</h3>
         <p>{gameData?.description}</p>
         <hr />
-        <PlayerTable players={gameData.players} ownerEmail={gameData.ownerEmail}/>
+        <PlayerTable
+          players={gameData.players}
+          ownerEmail={gameData.ownerEmail}
+        />
       </div>
       {gameData.ownerEmail === userData?.user.email && (
         <OwnerActions gameId={gameId} />
