@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import {Picsum} from "picsum-photos"
 
 
 const prisma = new PrismaClient()
@@ -12,7 +13,7 @@ const createUser = async (prisma: PrismaClient, email: string, name: string) => 
         create: {
             email,
             name,
-            image: "https://picsum.photos/128",
+            image: Picsum.url({height: 128, cache: false}),
             player: {
                 connectOrCreate: {
                     create: {
@@ -30,9 +31,9 @@ const createUser = async (prisma: PrismaClient, email: string, name: string) => 
 }
 
 const main = async () => {
-    const teddy = await createUser(prisma, "teddy@kgb.gov", "Teddy KGB")
-    const mike = await createUser(prisma, "mike@poker.gov", "Mike McDermott")
-    const worm = await createUser(prisma, "worm@poker.gov", "Worm")
+    await createUser(prisma, "teddy@kgb.gov", "Teddy KGB")
+    await createUser(prisma, "mike@poker.gov", "Mike McDermott")
+    await createUser(prisma, "worm@poker.gov", "Worm")
 }
 
 main().then(async () => {
