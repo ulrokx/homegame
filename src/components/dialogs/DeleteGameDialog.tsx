@@ -1,13 +1,16 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { type GameDialogProps } from "./common";
 import { api } from "../../utils/api";
+import { useRouter } from "next/router";
 
 export default function DeleteGameDialog({gameId, open, closeDialog}: GameDialogProps) {
     const {mutateAsync, isLoading} = api.game.deleteGame.useMutation()
+    const router = useRouter()
 
     const handleDelete = async () => {
         await mutateAsync({gameId})
         closeDialog && closeDialog()
+        await router.replace("/games") 
     }
     return (
         <Dialog open={open} onClose={closeDialog}>
