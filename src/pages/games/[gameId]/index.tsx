@@ -5,6 +5,7 @@ import PlayerTable from "../../../components/display/PlayerTable";
 import OwnerActions from "../../../components/inputs/OwnerActions";
 import { useSession } from "next-auth/react";
 import DatafulYesMaybeNo from "../../../components/inputs/DatafulYesMaybeNo";
+import GameStatusText from "../../../components/display/GameStatusText";
 
 export default function Game() {
   const router = useRouter();
@@ -26,6 +27,8 @@ export default function Game() {
             </h2>
             <h3 className="text-xl font-semibold">{gameData.location}</h3>
             <p>{gameData?.description}</p>
+            <p>Owner: {gameData?.ownerEmail}</p>
+            <p>Game Status: <GameStatusText status={gameData.status}/></p>
           </div>
           <DatafulYesMaybeNo gameId={gameId} />
         </div>
@@ -36,7 +39,7 @@ export default function Game() {
         />
       </div>
       {gameData.ownerEmail === userData?.user.email && (
-        <OwnerActions gameId={gameId} />
+        <OwnerActions gameId={gameId} gameStatus={gameData.status}/>
       )}
     </div>
   );

@@ -1,4 +1,11 @@
-import { Button, Checkbox, Dialog, DialogContent, DialogTitle, FormControlLabel } from "@mui/material";
+import {
+  Button,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+} from "@mui/material";
 import { type GameDialogProps } from "./common";
 import { Controller, type SubmitHandler, useForm } from "react-hook-form";
 import PokerPlayersSelect from "../inputs/PokerPlayersSelect";
@@ -46,8 +53,9 @@ export default function StartGameDialog({
       <DialogTitle>Start Game</DialogTitle>
       <DialogContent>
         <form
-        className="flex flex-col gap-2"
-        onSubmit={(...args) => void handleSubmit(onSubmit)(...args)}>
+          className="flex flex-col gap-2"
+          onSubmit={(...args) => void handleSubmit(onSubmit)(...args)}
+        >
           <p>
             Are you sure you want to start this game? Once started, the game
             cannot be stopped. Add any players that are ready to play but have
@@ -56,7 +64,13 @@ export default function StartGameDialog({
           <Controller
             control={control}
             name="confirm"
-            render={({ field }) => <FormControlLabel {...field} control={<Checkbox />} label="I understand"/>}
+            render={({ field }) => (
+              <FormControlLabel
+                {...field}
+                control={<Checkbox />}
+                label="I understand"
+              />
+            )}
           />
           <PokerPlayersSelect
             control={control}
@@ -64,7 +78,9 @@ export default function StartGameDialog({
             name="readyToPlay"
             multiple
           />
-          <Button type="submit" color="success">Start Game</Button>
+          <Button type="submit" color="success">
+            Start Game
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

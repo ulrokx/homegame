@@ -331,8 +331,8 @@ export const gameRouter = createTRPCRouter({
         },
         data: {
           accepted: "YES",
-        }
-      })
+        },
+      });
 
       await ctx.db.game.update({
         where: {
