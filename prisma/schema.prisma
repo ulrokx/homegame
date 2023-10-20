@@ -83,6 +83,7 @@ model Game {
     players      PlayerStat[]
     owner        Player       @relation(fields: [ownerEmail], references: [email])
     ownerEmail   String
+    deleted   Boolean  @default(false)
 
     @@index([name])
 }
@@ -97,6 +98,7 @@ model PlayerStat {
     stack       Decimal        @default(0) @db.Decimal(10, 2)
     createdAt   DateTime       @default(now())
     updatedAt   DateTime       @updatedAt
+    deleted   Boolean  @default(false)
 
     @@id([playerEmail, gameId])
 }
