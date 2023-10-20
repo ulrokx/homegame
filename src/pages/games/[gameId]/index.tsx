@@ -18,7 +18,7 @@ export default function Game() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-start gap-2 bg-gradient-to-b from-purple-400 to-purple-700 pt-8">
       <div className="flex w-3/4 flex-col gap-2 rounded-md bg-gray-50 p-4 shadow">
-        <div className="flex flex-col md:flex-row md:justify-between items-center">
+        <div className="flex flex-col items-center md:flex-row md:justify-between">
           <div>
             <h1 className="block text-5xl font-semibold">{gameData?.name}</h1>
             <h2 className="text-2xl font-medium">

@@ -4,6 +4,7 @@ import { gameValidationSchema } from "../../../pages/games/create";
 import { type AcceptedStatus } from "@prisma/client";
 import { invitePlayerValidationSchema } from "../../../components/dialogs/InvitePlayerDialog";
 import { TRPCError } from "@trpc/server";
+import { startGameValidationSchema } from "../../../components/dialogs/StartGameDialog";
 
 export const gameRouter = createTRPCRouter({
   getGames: protectedProcedure.query(({ ctx }) => {
@@ -267,8 +268,18 @@ export const gameRouter = createTRPCRouter({
       return true;
     }),
   startGame: protectedProcedure
-    .input(z.object({ gameId: z.string() }))
-    .mutation(async ({ input: { gameId }, ctx }) => {
+    .input(
+      startGameValidationSchema.extend({
+        gameId: z.string(),
+      }),
+    )
+    .mutation(async ({ input: { gameId, readyToPlay, confirm }, ctx }) => {
+      if (!confirm) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Must confirm",
+        });
+      }
       const existingGame = await ctx.db.game.findFirst({
         where: {
           id: gameId,
@@ -311,12 +322,25 @@ export const gameRouter = createTRPCRouter({
         });
       }
 
+      await ctx.db.playerStat.updateMany({
+        where: {
+          gameId,
+          playerEmail: {
+            in: readyToPlay.map((email) => email),
+          },
+        },
+        data: {
+          accepted: "YES",
+        }
+      })
+
       await ctx.db.game.update({
         where: {
           id: gameId,
         },
         data: {
           status: "IN_PROGRESS",
+          startedAt: new Date(),
         },
       });
     }),

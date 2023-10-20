@@ -3,6 +3,7 @@ import { useState } from "react";
 import EditGameDialog from "../dialogs/EditGameDialog";
 import InvitePlayerDialog from "../dialogs/InvitePlayerDialog";
 import DeleteGameDialog from "../dialogs/DeleteGameDialog";
+import StartGameDialog from "../dialogs/StartGameDialog";
 
 interface OwnerActions {
   gameId: string;
@@ -23,7 +24,9 @@ export default function OwnerActions({ gameId }: OwnerActionsProps) {
       <Button onClick={createHandleOnClick("edit")}>Edit Game</Button>
       <Button onClick={createHandleOnClick("invite")}>Invite Player</Button>
       <Button onClick={createHandleOnClick("delete")}>Delete Game</Button>
-      <Button color="success">Start Game</Button>
+      <Button onClick={createHandleOnClick("start")} color="success">
+        Start Game
+      </Button>
       <EditGameDialog
         gameId={gameId}
         open={dialog === "edit"}
@@ -37,6 +40,11 @@ export default function OwnerActions({ gameId }: OwnerActionsProps) {
       <DeleteGameDialog
         gameId={gameId}
         open={dialog === "delete"}
+        closeDialog={handleCloseDialog}
+      />
+      <StartGameDialog
+        gameId={gameId}
+        open={dialog === "start"}
         closeDialog={handleCloseDialog}
       />
     </div>

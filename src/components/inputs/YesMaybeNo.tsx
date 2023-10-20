@@ -22,7 +22,7 @@ export default function YesMaybeNo({ onResponse, status }: YesMaybeNoProps) {
       return false;
     };
   return (
-    <div className="space-between flex w-min h-min flex-row rounded-lg bg-gray-200 p-2">
+    <div className="space-between flex h-min w-min flex-row rounded-lg bg-gray-200 p-2">
       <IconButton onClick={createOnClick("YES")}>
         <ThumbUpIcon color={status === "YES" ? "success" : undefined} />
       </IconButton>
