@@ -8,12 +8,13 @@ import {
 import { forwardRef, useMemo } from "react";
 import { Autocomplete, Avatar, Chip, Skeleton, TextField } from "@mui/material";
 import { api } from "../../utils/api";
+import { useSession } from "next-auth/react";
 
 interface Player {
   id: string;
   name: string;
   email: string;
-  image: string;
+  image: string | null;
 }
 
 interface PokerPlayersSelectProps<T extends FieldValues>
@@ -39,13 +40,17 @@ export default function PokerPlayersSelect<T extends FieldValues>({
   ...props
 }: PokerPlayersSelectProps<T>) {
   const { data: playerData, isLoading } = api.user.getUsers.useQuery();
+  const {data: sessionData} = useSession()
   if (!playerData || isLoading) return <Skeleton variant="rectangular" />;
+  const otherPlayers = playerData.filter(
+    (player) => player.email !== sessionData?.user.email,
+  );
   return (
     <Controller
       name={name}
       control={control}
       render={({ field }) => (
-        <PokerTableSelect players={playerData} {...props} {...field} />
+        <PokerTableSelect players={otherPlayers} {...props} {...field} />
       )}
     />
   );
@@ -79,7 +84,7 @@ const PlayerSelect = forwardRef<HTMLInputElement, PokerTableSelectProps>(
                   avatar={
                     <Avatar
                       alt={player.email}
-                      src={player.image}
+                      src={player.image ?? undefined}
                       imgProps={{ referrerPolicy: "no-referrer" }}
                     />
                   }
