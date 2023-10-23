@@ -28,7 +28,9 @@ export default function Game() {
             <h3 className="text-xl font-semibold">{gameData.location}</h3>
             <p>{gameData?.description}</p>
             <p>Owner: {gameData?.ownerEmail}</p>
-            <p>Game Status: <GameStatusText status={gameData.status}/></p>
+            <p>
+              Game Status: <GameStatusText status={gameData.status} />
+            </p>
           </div>
           <DatafulYesMaybeNo gameId={gameId} />
         </div>
@@ -39,7 +41,7 @@ export default function Game() {
         />
       </div>
       {gameData.ownerEmail === userData?.user.email && (
-        <OwnerActions gameId={gameId} gameStatus={gameData.status}/>
+        <OwnerActions gameId={gameId} gameStatus={gameData.status} />
       )}
     </div>
   );

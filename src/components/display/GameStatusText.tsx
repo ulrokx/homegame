@@ -10,12 +10,12 @@ export default function GameStatusText({ status }: GameStatusTextProps) {
       ? "bg-yellow-400"
       : status === GameStatus.IN_PROGRESS
       ? "bg-green-400"
-      : "bg-red-400"
+      : "bg-red-400";
   const text =
     status === GameStatus.PENDING
       ? "Not Started"
       : status === GameStatus.IN_PROGRESS
       ? "In Progress"
       : "Complete";
-  return <span className={`${textColor} p-1 rounded font-bold`}>{text}</span>;
+  return <span className={`${textColor} rounded p-1 font-bold`}>{text}</span>;
 }
